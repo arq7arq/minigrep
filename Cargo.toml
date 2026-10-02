@@ -2,5 +2,8 @@
 name = "minigrep"
 version = "0.1.0"
 edition = "2024"
+description = "A simple grep-like command tool for learning purposes from rust book"
+license = ""
+authors = ["https://github.com/arq7arq"]
 
 [dependencies]
