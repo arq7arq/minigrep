@@ -1,8 +1,9 @@
 use std::error::Error;
-use std::fs;
+use std::io::Read;
+use std::{fs, io};
 pub struct Config{
     pub query: String,
-    pub filename: String,
+    pub filename: Option<String>,
     pub case_sensitive: bool
 }
 
@@ -10,15 +11,12 @@ impl Config {
 
     pub fn new(args: &[String]) -> Result<Config, &str>{
 
-        if args.len() < 3 {
-            return  Err("not enough arguments");
-        }
 
         let mut argumets = Vec::new();
 
         let mut case_sensitive: bool = true;
 
-        for arg in args.iter(){
+        for arg in args.iter().skip(1){
             match arg.as_str(){
                 "-i" => {
                     case_sensitive = false;
@@ -29,15 +27,27 @@ impl Config {
             }
         }
 
-        let query= args[1].clone();
-        let filename= args[2].clone();
+        if argumets.is_empty(){
+            return  Err("Missing query");
+        }
+
+        let query= argumets[0].clone();
+        let filename= argumets.get(1).map(|value| (*value).clone());
 
         Ok(Config { query, filename , case_sensitive})
     }
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>>{
-    let contents = fs::read_to_string(config.filename)?;
+    let contents = match config.filename {
+        
+        Some(value) => fs::read_to_string(value)?,
+        None => {
+            let mut input = String::new();
+            io::stdin().read_to_string(&mut input)?;
+            input
+        }
+    };
 
     let results = if config.case_sensitive {
         search_case_sensitive(&config.query, &contents)
