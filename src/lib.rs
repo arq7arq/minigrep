@@ -1,7 +1,5 @@
 use std::error::Error;
 use std::fs;
-use std::env;
-
 pub struct Config{
     pub query: String,
     pub filename: String,
@@ -16,9 +14,23 @@ impl Config {
             return  Err("not enough arguments");
         }
 
+        let mut argumets = Vec::new();
+
+        let mut case_sensitive: bool = true;
+
+        for arg in args.iter(){
+            match arg.as_str(){
+                "-i" => {
+                    case_sensitive = false;
+                }
+                _ => {
+                    argumets.push(arg);
+                }
+            }
+        }
+
         let query= args[1].clone();
         let filename= args[2].clone();
-        let case_sensitive = env::var("CASE_SENSITIVE").is_err();
 
         Ok(Config { query, filename , case_sensitive})
     }
